@@ -1,0 +1,146 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the data
+file_path = '/Users/josephepstein/Rational Belief Updating.csv'
+data = pd.read_csv(file_path)
+
+# Find the index of the 'PRE' and 'CHANGE' columns
+pre_index = data.columns.get_loc('PRE')
+change_index = data.columns.get_loc('CHANGE')
+
+# Select the first column to the right of 'PRE' and 'CHANGE'
+pre_1n_2 = data.columns[pre_index + 1]
+change_1n = data.columns[change_index + 1]
+
+# Use the PRE and CHANGE columns for the x and y axes
+data['Pre'] = data[pre_1n_2]
+data['Change'] = data[change_1n]
+
+# Clean the data (remove rows where cond, Pre, or Change is NaN)
+data_clean = data.dropna(subset=['cond', 'Pre', 'Change'])
+
+# Define function to calculate alpha for a given range of PRE
+def calculate_alpha_for_range(data, pre_min, pre_max):
+    data_filtered = data[(data['Pre'] > pre_min) & (data['Pre'] <= pre_max)]
+    
+    # Separate the filtered data based on the condition
+    data_cond1 = data_filtered[data_filtered['cond'] == 1]
+    data_cond2 = data_filtered[data_filtered['cond'] == 2]
+    
+    # Perform linear regression using numpy's polyfit for both conditions
+    slope1, intercept1 = np.polyfit(data_cond1['Pre'], data_cond1['Change'], 1)
+    slope2, intercept2 = np.polyfit(data_cond2['Pre'], data_cond2['Change'], 1)
+    
+    # Calculate the average of the two slopes (Alpha level of tolerance)
+    alpha = (slope1 + slope2) / 2
+    return alpha
+
+# Calculate alpha for each range
+alpha_0_25 = calculate_alpha_for_range(data_clean, 0, 25)
+alpha_25_50 = calculate_alpha_for_range(data_clean, 25, 50)
+alpha_50_75 = calculate_alpha_for_range(data_clean, 50, 75)
+alpha_75_100 = calculate_alpha_for_range(data_clean, 75, 100)
+
+# Print the alpha scores for each range
+print(f"Alpha for 0 <= PRE <= 25: {alpha_0_25}")
+print(f"Alpha for 25 < PRE <= 50: {alpha_25_50}")
+print(f"Alpha for 50 < PRE <= 75: {alpha_50_75}")
+print(f"Alpha for 75 < PRE <= 100: {alpha_75_100}")
+
+# Prepare data for boxplots (aligned with respective ranges)
+data_range1 = data_clean[(data_clean['Pre'] > 0) & (data_clean['Pre'] <= 25)]
+data_range2 = data_clean[(data_clean['Pre'] > 25) & (data_clean['Pre'] <= 50)]
+data_range3 = data_clean[(data_clean['Pre'] > 50) & (data_clean['Pre'] <= 75)]
+data_range4 = data_clean[(data_clean['Pre'] > 75) & (data_clean['Pre'] <= 100)]
+
+
+# Function to calculate all 8 measures for a specific range of 'Pre'
+def boxplot_measures(data_range):
+    measures = {}
+
+    # 1. Median (Central Tendency)
+    measures['median'] = data_range['Change'].median()
+
+    # 2. Interquartile Range (IQR)
+    Q1 = data_range['Change'].quantile(0.25)
+    Q3 = data_range['Change'].quantile(0.75)
+    IQR = Q3 - Q1
+    measures['IQR'] = IQR
+
+    # 3. Whiskers (Range)
+    whisker_low = data_range['Change'].min()
+    whisker_high = data_range['Change'].max()
+    measures['whisker_low'] = whisker_low
+    measures['whisker_high'] = whisker_high
+
+    # 4. Outliers
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    outliers = data_range[(data_range['Change'] < lower_bound) | (data_range['Change'] > upper_bound)]['Change']
+    measures['outliers'] = outliers.tolist()
+
+    # 5. Skewness
+    skewness = data_range['Change'].skew()
+    measures['skewness'] = skewness
+
+    # 6. Spread/Variability
+    spread = data_range['Change'].std()
+    measures['spread'] = spread
+
+    # 7. Symmetry
+    symmetry = (measures['median'] - Q1) / (Q3 - measures['median'])
+    measures['symmetry'] = symmetry
+
+    return measures
+
+# Function to print the statistics for each range
+def print_statistics(data_range, label):
+    measures = boxplot_measures(data_range)
+    print(f"Statistics for {label}:")
+    for measure, value in measures.items():
+        print(f"{measure.capitalize()}: {value}")
+
+# Display statistics for each range
+print_statistics(data_range1, "0-25")
+print_statistics(data_range2, "25-50")
+print_statistics(data_range3, "50-75")
+print_statistics(data_range4, "75-100")
+
+# Visualization: Scatter plot with boxplots for each range
+plt.figure(figsize=(12, 8))
+
+# Scatter plots for different ranges
+data_ranges = [
+    ((0, 25), 'red', '0 <= PRE <= 25'),
+    ((25, 50), 'blue', '25 < PRE <= 50'),
+    ((50, 75), 'green', '50 < PRE <= 75'),
+    ((75, 100), 'purple', '75 < PRE <= 100')
+]
+
+for (pre_min, pre_max), color, label in data_ranges:
+    data_range = data_clean[(data_clean['Pre'] > pre_min) & (data_clean['Pre'] <= pre_max)]
+    plt.scatter(data_range['Pre'], data_range['Change'], color=color, label=label)
+
+# Boxplots: We create offset x-axis positions to align them with the scatter plots
+positions = [12.5, 37.5, 62.5, 87.5]  # Center positions for each range
+box_data = [data_range1['Change'], data_range2['Change'], data_range3['Change'], data_range4['Change']]
+
+# Create boxplots with transparency
+plt.boxplot(box_data, positions=positions, patch_artist=True, widths=10, 
+            boxprops=dict(facecolor='lightgrey', alpha=0.5),  # Translucent grey boxes
+            medianprops=dict(color='black'),                 # Black median line
+            whiskerprops=dict(color='black'),                # Black whiskers
+            capprops=dict(color='black'))
+
+# Labels and title
+plt.xlabel('Certainity of Initial Belief (PRE)')
+plt.ylabel('Change in Belief after Intermediate Evidence (CHANGE)')
+plt.title('Belief Update from Initial Belief-Certainty Range')
+
+# Add legend
+plt.legend()
+
+# Show the plot
+plt.show()
