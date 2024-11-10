@@ -1101,30 +1101,48 @@ party affiliation
 "“CHANGE”
 ","“Change” 1N through 12N are the 
 rational belief updates
-of the neutral items
-",,Rational Belief Update Formula,,
+of the neutral items,,,,
+
+",,Rational Belief Update Formula,, 
+### Evidence, Magnitude, and Prediction Error Model
+
+Define:
+Evidence: \\(\{ \text{support}, \text{against} \} \rightarrow E = \{-1, +1\} \\)
+Magnitude: \\(\{ \text{high}, \text{low} \} \rightarrow M = \{-1, +1\} \\)
+\\( \text{sign}(\text{prediction error}) = \{-1, +1\} \\)
+
+Equations:
+
+1. \\( \Delta B_{\text{rational}} = \text{RUD} \times \Delta B \\)
+
+2. \\( \text{RUD}_{\text{control}} = E \\)
+
+3. \\( \text{RUD}_{\text{prediction}} = E \times M \times \text{sign}(\text{prediction error}) \\)
 
 ,,,,,,
-Category Omitted Entirely,,,,,,
-Sub-Categories Omitted,,,,,,
+**Category Omitted Entirely,,,,,,
+#Sub-Categories Omitted,,,,,,
 "“PRE”
 
-","1D through 12D are the 
+#","1D through 12D are the 
 pretest belief ratings
 of the democratic items","1R through 12R are the 
 pretest belief ratings
 of the republican items",,,,
-“Prediction Error”,"1N through 12N are the 
+**“Prediction Error”,"1N through 12N are the 
 Prediction error sizes
 of the neutral items",,"1D through 12D are the 
 prediction error sizes
 of the democratic items",,"“Change” 1R through 12R are the 
 prediction error sizes
 of the republican items",
-"CHANGE
+#"CHANGE
 ","“Change” 1D through 12D are the 
 rational belief updates
 of the democratic items
 ",,"“Change” 1R through 12R are the 
 rational belief updates
 of the republican items",,,
+
+
+
