@@ -144,3 +144,49 @@ plt.legend()
 
 # Show the plot
 plt.show()
+
+
+
+# Output Values
+
+Slope Alpha for 0 <= PRE <= 25: -1.1738992109011352
+Slope Alpha for 25 < PRE <= 50: -1.0280021309431118
+Slope Alpha for 50 < PRE <= 75: -0.6123830076961132
+Slope Alpha for 75 < PRE <= 100: -0.4187767369398036
+Statistics for 0-25:
+Median: 40.0
+Iqr: 45.5
+Whisker_low: -18
+Whisker_high: 92
+Outliers: []
+Skewness: -0.14337572001873133
+Spread: 28.14917365534708
+Symmetry: 0.9361702127659575
+Statistics for 25-50:
+Median: 21.0
+Iqr: 40.0
+Whisker_low: -47
+Whisker_high: 71
+Outliers: []
+Skewness: -0.041109080972401346
+Spread: 24.457839541172614
+Symmetry: 1.0
+Statistics for 50-75:
+Median: 3.0
+Iqr: 29.0
+Whisker_low: -71
+Whisker_high: 49
+Outliers: [-71, -66, -71, -70, -58, -61]
+Skewness: -0.6327067000776132
+Spread: 22.708721054335005
+Symmetry: 0.9333333333333333
+Statistics for 75-100:
+Median: -5.0
+Iqr: 26.0
+Whisker_low: -100
+Whisker_high: 24
+Outliers: [-100, -80, -74, -66, -94, -86, -66, -65, -69, -68, -66]
+Skewness: -1.0811231570797548
+Spread: 24.166055826883337
+Symmetry: 2.466666666666667
+
