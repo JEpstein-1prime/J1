@@ -1,0 +1,200 @@
+
+
+#Normal Distribution Simulation
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Simulation parameters
+n_simulations = 1000  # Number of simulations
+n = 100  # Number of belief updates per simulation
+initial_belief = 0.5  # Initial belief value
+mean_normal = 0.5  # Mean of the normal distribution
+std_dev_normal = 0.2  # Standard deviation of the normal distribution
+
+# Initialize containers for results
+alpha_list = []  # Average standard deviations from current belief
+tau_list = []  # Average stepwise deviations between consecutive updates
+Delta_i_list = []  # Sum of stepwise deviations
+psi_list = []  # Squared deviations between Delta_i and Tau
+
+# Simulation loop
+for sim in range(n_simulations):
+    x_t = [initial_belief]  # Belief trajectory for this simulation
+    step_sizes = []  # Step-size changes
+    psi_t_list = []  # Psi values over time
+    
+    # Perform updates
+    for t in range(1, n + 1):
+        x_i_t = np.random.normal(mean_normal, std_dev_normal)
+        x_i_t = min(max(x_i_t, 0), 1)  # Keep belief in range [0, 1]
+
+        if t > 1:
+            delta_t = x_t[-1] - x_t[-2]
+            step_sizes.append(delta_t)
+            mean_delta = np.mean(step_sizes)
+            psi_t = np.mean([(delta - mean_delta) ** 2 for delta in step_sizes])
+            psi_t_list.append(psi_t)
+        else:
+            psi_t = 0.1  # Initial psi value
+            psi_t_list.append(psi_t)
+
+        if t >= 6 and abs(x_i_t - x_t[-1]) > psi_t:
+            new_belief = x_t[-1]  # No update if outside tolerance
+        else:
+            new_belief = x_i_t  # Update belief directly
+        
+        x_t.append(new_belief)
+
+    # Compute summary statistics for this simulation
+    alpha = np.mean([np.std(x_t[:t]) for t in range(1, len(x_t))])
+    tau = np.mean([abs(step_sizes[i]) for i in range(len(step_sizes))])
+    Delta_i = sum(abs(delta) for delta in step_sizes)
+    psi = np.mean([(Delta_i - tau) ** 2])
+
+    alpha_list.append(alpha)
+    tau_list.append(tau)
+    Delta_i_list.append(Delta_i)
+    psi_list.append(psi)
+
+# Calculate overall summary statistics
+summary_stats = {
+    "Mean Alpha": np.mean(alpha_list),
+    "Mean Tau": np.mean(tau_list),
+    "Mean Delta_i": np.mean(Delta_i_list),
+    "Mean Psi": np.mean(psi_list),
+    "Alpha Std Dev": np.std(alpha_list),
+    "Tau Std Dev": np.std(tau_list),
+    "Delta_i Std Dev": np.std(Delta_i_list),
+    "Psi Std Dev": np.std(psi_list),
+}
+
+# Print summary statistics
+print("Summary Statistics Across All Simulations:")
+for stat, value in summary_stats.items():
+    print(f"{stat}: {value:.4f}")
+
+# Visualization of distributions
+plt.figure(figsize=(12, 8))
+plt.hist(alpha_list, bins=20, alpha=0.6, label="Alpha (Average Std Dev)", color='blue')
+plt.hist(tau_list, bins=20, alpha=0.6, label="Tau (Average Stepwise Dev)", color='orange')
+plt.hist(Delta_i_list, bins=20, alpha=0.6, label="Delta_i (Sum of Deviations)", color='green')
+plt.hist(psi_list, bins=20, alpha=0.6, label="Psi (Squared Deviations)", color='red')
+plt.title("Distributions of Summary Statistics", fontsize=16)
+plt.xlabel("Value", fontsize=14)
+plt.ylabel("Frequency", fontsize=14)
+plt.legend(fontsize=12)
+plt.grid(True)
+plt.show()
+
+#Summary Statistics Across All Simulations:
+#Mean Alpha: 0.0835
+#Mean Tau: 0.0113
+#Mean Delta_i: 1.1139
+#Mean Psi: 1.4485
+#Alpha Std Dev: 0.0317
+#Tau Std Dev: 0.0049
+#Delta_i Std Dev: 0.4873
+#Psi Std Dev: 1.3793
+
+
+
+
+#Uniform Distribution Simulation
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Simulation parameters
+n_simulations = 1000  # Number of simulations
+n = 100  # Number of belief updates per simulation
+initial_belief = 0.5  # Initial belief value
+
+# Initialize containers for results
+alpha_list = []  # Average standard deviations from current belief
+tau_list = []  # Average stepwise deviations between consecutive updates
+Delta_i_list = []  # Sum of stepwise deviations
+psi_list = []  # Squared deviations between Delta_i and Tau
+
+# Simulation loop
+for sim in range(n_simulations):
+    x_t = [initial_belief]  # Belief trajectory for this simulation
+    step_sizes = []  # Step-size changes
+    psi_t_list = []  # Psi values over time
+    
+    # Perform updates
+    for t in range(1, n + 1):
+        x_i_t = np.random.uniform(0, 1)  # Generate belief update from uniform distribution
+
+        if t > 1:
+            delta_t = x_t[-1] - x_t[-2]
+            step_sizes.append(delta_t)
+            mean_delta = np.mean(step_sizes)
+            psi_t = np.mean([(delta - mean_delta) ** 2 for delta in step_sizes])
+            psi_t_list.append(psi_t)
+        else:
+            psi_t = 0.1  # Initial psi value
+            psi_t_list.append(psi_t)
+
+        if t >= 6 and abs(x_i_t - x_t[-1]) > psi_t:
+            new_belief = x_t[-1]  # No update if outside tolerance
+        else:
+            new_belief = x_i_t  # Update belief directly
+        
+        x_t.append(new_belief)
+
+    # Compute summary statistics for this simulation
+    alpha = np.mean([np.std(x_t[:t]) for t in range(1, len(x_t))])
+    tau = np.mean([abs(step_sizes[i]) for i in range(len(step_sizes))])
+    Delta_i = sum(abs(delta) for delta in step_sizes)
+    psi = np.mean([(Delta_i - tau) ** 2])
+
+    alpha_list.append(alpha)
+    tau_list.append(tau)
+    Delta_i_list.append(Delta_i)
+    psi_list.append(psi)
+
+# Calculate overall summary statistics
+summary_stats = {
+    "Mean Alpha": np.mean(alpha_list),
+    "Mean Tau": np.mean(tau_list),
+    "Mean Delta_i": np.mean(Delta_i_list),
+    "Mean Psi": np.mean(psi_list),
+    "Alpha Std Dev": np.std(alpha_list),
+    "Tau Std Dev": np.std(tau_list),
+    "Delta_i Std Dev": np.std(Delta_i_list),
+    "Psi Std Dev": np.std(psi_list),
+}
+
+# Print summary statistics
+print("Summary Statistics Across All Simulations:")
+for stat, value in summary_stats.items():
+    print(f"{stat}: {value:.4f}")
+
+# Visualization of distributions
+plt.figure(figsize=(12, 8))
+plt.hist(alpha_list, bins=20, alpha=0.6, label="Alpha (Average Std Dev)", color='blue')
+plt.hist(tau_list, bins=20, alpha=0.6, label="Tau (Average Stepwise Dev)", color='orange')
+plt.hist(Delta_i_list, bins=20, alpha=0.6, label="Delta_i (Sum of Deviations)", color='green')
+plt.hist(psi_list, bins=20, alpha=0.6, label="Psi (Squared Deviations)", color='red')
+plt.title("Distributions of Summary Statistics (Uniform Distribution)", fontsize=16)
+plt.xlabel("Value", fontsize=14)
+plt.ylabel("Frequency", fontsize=14)
+plt.legend(fontsize=12)
+plt.grid(True)
+plt.show()
+
+
+#Summary Statistics Across All Simulations:
+#Mean Alpha: 0.1244
+#Mean Tau: 0.0173
+#Mean Delta_i: 1.7105
+#Mean Psi: 3.3244
+#Alpha Std Dev: 0.0387
+#Tau Std Dev: 0.0069
+#Delta_i Std Dev: 0.6831
+#Psi Std Dev: 2.7244
+
