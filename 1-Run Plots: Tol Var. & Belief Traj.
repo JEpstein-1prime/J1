@@ -1,0 +1,125 @@
+#Uniform Distribution Plots
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+n = 100  # Number of belief updates
+initial_belief = 0.5  # Initial belief value
+
+# Initialize variables
+x_t = [initial_belief]  # Belief values over time
+psi_t_list = []         # Variance (\(\psi_t\)) over time
+step_sizes = []         # Step-size changes
+
+# Simulation loop
+for t in range(1, n + 1):
+    # Generate new external input with a uniform distribution
+    x_i_t = np.random.uniform(0, 1)
+
+    # Compute step-to-step difference
+    if t > 1:
+        delta_t = x_t[-1] - x_t[-2]
+        step_sizes.append(delta_t)
+        # Compute variance (\(\psi_t\)) as the variance of step-size changes
+        mean_delta = np.mean(step_sizes)
+        psi_t = np.mean([(delta - mean_delta) ** 2 for delta in step_sizes])
+        psi_t_list.append(psi_t)
+    else:
+        psi_t = 0.1  # Default for the very first step
+        psi_t_list.append(psi_t)
+
+    # Apply the tolerance threshold condition starting at step 6
+    if t >= 6 and abs(x_i_t - x_t[-1]) > psi_t:
+        new_belief = x_t[-1]  # No update if outside tolerance
+    else:
+        new_belief = x_i_t  # Update belief directly
+
+    # Update belief values
+    x_t.append(new_belief)
+
+# Plot 1: Variance (\(\psi_t\)) over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, n + 1), psi_t_list, marker='o', linestyle='-', color='blue', label="Variance $\psi_t$")
+plt.title("Variance $\psi_t$ Over Time (Uniform Distribution)", fontsize=14)
+plt.xlabel("Time Step", fontsize=12)
+plt.ylabel("Variance $\psi_t$", fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend(fontsize=12)
+plt.show()
+
+# Plot 2: Belief trajectory (\(x_t\)) over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(n + 1), x_t, marker='o', linestyle='-', color='purple', label="Belief Trajectory $x_t$")
+plt.title("Belief Trajectory Over Time (Uniform Distribution)", fontsize=14)
+plt.xlabel("Time Step", fontsize=12)
+plt.ylabel("Belief Value $x_t$", fontsize=12)
+plt.grid(True)
+plt.legend(fontsize=12)
+plt.show()
+
+
+#Normal Distribution Plots
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+n = 100  # Number of belief updates
+initial_belief = 0.5  # Initial belief value
+mean_normal = 0.5  # Mean of the normal distribution
+std_dev_normal = 0.2  # Standard deviation of the normal distribution
+
+# Initialize variables
+x_t = [initial_belief]  # Belief values over time
+psi_t_list = []         # Variance (\(\psi_t\)) over time
+step_sizes = []         # Step-size changes
+
+# Simulation loop
+for t in range(1, n + 1):
+    # Generate new external input with a normal distribution
+    x_i_t = np.random.normal(mean_normal, std_dev_normal)
+
+    # Ensure x_i_t stays within [0, 1]
+    x_i_t = min(max(x_i_t, 0), 1)
+
+    # Compute step-to-step difference
+    if t > 1:
+        delta_t = x_t[-1] - x_t[-2]
+        step_sizes.append(delta_t)
+        # Compute variance (\(\psi_t\)) as the variance of step-size changes
+        mean_delta = np.mean(step_sizes)
+        psi_t = np.mean([(delta - mean_delta) ** 2 for delta in step_sizes])
+        psi_t_list.append(psi_t)
+    else:
+        psi_t = 0.1  # Default for the very first step
+        psi_t_list.append(psi_t)
+
+    # Apply the tolerance threshold condition starting at step 6
+    if t >= 6 and abs(x_i_t - x_t[-1]) > psi_t:
+        new_belief = x_t[-1]  # No update if outside tolerance
+    else:
+        new_belief = x_i_t  # Update belief directly
+
+    # Update belief values
+    x_t.append(new_belief)
+
+# Plot 1: Variance (\(\psi_t\)) over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, n + 1), psi_t_list, marker='o', linestyle='-', color='blue', label="Variance $\psi_t$")
+plt.title("Variance $\psi_t$ Over Time (Normal Distribution)", fontsize=14)
+plt.xlabel("Time Step", fontsize=12)
+plt.ylabel("Variance $\psi_t$", fontsize=12)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend(fontsize=12)
+plt.show()
+
+# Plot 2: Belief trajectory (\(x_t\)) over time
+plt.figure(figsize=(10, 6))
+plt.plot(range(n + 1), x_t, marker='o', linestyle='-', color='purple', label="Belief Trajectory $x_t$")
+plt.title("Belief Trajectory Over Time (Normal Distribution)", fontsize=14)
+plt.xlabel("Time Step", fontsize=12)
+plt.ylabel("Belief Value $x_t$", fontsize=12)
+plt.grid(True)
+plt.legend(fontsize=12)
+plt.show()
