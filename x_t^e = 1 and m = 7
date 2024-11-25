@@ -1,0 +1,77 @@
+#set x_t^e = 1 for each timestep
+
+# Parameters for single simulation
+m_memory = 7  # Number of memories retained
+n = 100  # Number of belief updates
+initial_belief = 0.5  # Initial belief value
+
+# Containers for results
+x_t = [initial_belief]  # Belief trajectory
+step_sizes = []  # Step-size changes (for the last 7 steps)
+psi_t_list = []  # Psi values over time
+
+# Single simulation loop with x_t^e = 1
+for t in range(1, n + 1):
+    # Set external input (x_t^e) to 1
+    x_i_t = 1.0
+
+    if t > 1:
+        # Calculate step size and tolerance based on the last 7 steps
+        delta_t = x_t[-1] - x_t[-2]
+        step_sizes.append(delta_t)
+        if len(step_sizes) > m_memory:
+            step_sizes.pop(0)  # Retain only the last 7 steps
+
+        mean_delta = np.mean(step_sizes)
+        psi_t = np.mean([(delta - mean_delta) ** 2 for delta in step_sizes])
+    else:
+        psi_t = 0  # Initial tolerance value
+
+    psi_t_list.append(psi_t)
+
+    # Compute alpha_t as the difference from the mean of the last 7 belief states
+    if len(x_t) > m_memory:
+        alpha_t = x_t[-1] - np.mean(x_t[-m_memory:])
+    else:
+        alpha_t = 0.5  # Default alpha during the initial period
+
+    alpha_t_list.append(alpha_t)
+
+    # Update belief based on tolerance and alpha
+    if t >= m_memory and abs(x_i_t - x_t[-1]) > psi_t:
+        new_belief = x_t[-1]  # No update if outside tolerance
+    else:
+        new_belief = x_t[-1] + alpha_t * (x_i_t - x_t[-1])  # Update belief using alpha
+
+    x_t.append(new_belief)
+
+# Plot results for belief, tolerance, and alpha changes over time
+plt.figure(figsize=(14, 8))
+
+# Belief change over time
+plt.subplot(3, 1, 1)
+plt.plot(range(n + 1), x_t, label="Belief Position (x_t)", color='blue')
+plt.title("Belief Position x_t (x_t^e = 1)")
+plt.xlabel("Timestep")
+plt.ylabel("Belief Position (0-1)")
+plt.grid(True)
+plt.legend()
+
+# Tolerance (Psi) over time
+plt.subplot(3, 1, 2)
+plt.plot(range(1, n + 1), psi_t_list, label="Tolerance (ψ_t)", color='green')
+plt.title("Tolerance ψ_t (x_t^e = 1)")
+plt.xlabel("Timestep")
+plt.ylabel("Tolerance (0-1)")
+plt.grid(True)
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+
+
+
+
+####Belief \( x_t \) and Tolerance \(\psi_t\); \( x_t^e = 1 \). At the very beginning, the \text{step\_sizes} list is still accumulating values. The tolerance \( \psi_t \) in this implementation only begins to reflect meaningful variance after 7 memories are filled (i.e., when the agent has 7 step-size changes stored in \text{step\_sizes}). Before \( t = 7 \), tolerance \( \psi_t \) will still be calculated, but the variance computation will be based on fewer step sizes, leading to potentially unstable or less reliable tolerance values. 
+####The code initializes \( \psi_t = 0 \) at \( t = 1 \), ensuring no tolerance applies initially. After \( t = 7 \), \( \psi_t \) becomes stable as it incorporates exactly 7 prior step sizes. The tolerance calculation requires at least one prior belief update (\( \Delta_t \)) to compute a variance, but this variance becomes meaningful only when the list has enough data points (ideally \( m = 7 \)). While \( t < 7 \), the variance will reflect very few steps.}
